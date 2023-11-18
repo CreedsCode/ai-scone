@@ -20,7 +20,8 @@
   "dependencies": {
     "@huggingface/inference": "^2.6.4",
     "figlet": "^1.7.0",
-    "jszip": "^3.10.1"
+    "jszip": "^3.10.1",
+    "python-shell": "^5.0.0"
   },
   "devDependencies": {
     "@types/figlet": "^1.5.7",

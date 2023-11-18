@@ -1,21 +1,19 @@
+import os
 from huggingface_hub import hf_hub_download
 
-HUGGING_FACE_API_KEY = ""
+hfkey = os.environ.get("HFKEY")
+if not hfkey:
+    raise ValueError("HFKEY environment variable is not set or is empty.")
 
-# Replace this if you want to use a different model
-model_id = "lmsys/fastchat-t5-3b-v1.0"
+model_id = "google/tapas-large-finetuned-wtq"
 filenames = [
-    "pytorch_model.bin", "added_tokens.json", "config.json", "generation_config.json",
-    "special_tokens_map.json", "spiece.model", "tokenizer_config.json"
+    "config.json", "model.safetensors", "pytorch_model.bin", "special_tokens_map.json",
+    "tf_model.h5", "tokenizer_config.json", "vocab.txt"
 ]
 
 for filename in filenames:
     downloaded_model_path = hf_hub_download(
         repo_id=model_id,
         filename=filename,
-        token=HUGGING_FACE_API_KEY
+        token=hfkey
     )
-
-    print(downloaded_model_path)
-
-print(downloaded_model_path)

@@ -1,34 +1,52 @@
+import os
 from langchain.llms import HuggingFacePipeline
 from langchain import PromptTemplate
 from timer import Timer
 from langchain.chains import LLMChain
+from transformers import pipeline
+import pandas as pd
+import json
+import zipfile
+import json
+import zipfile
+import pandas as pd
 
-model_id = "lmsys/fastchat-t5-3b-v1.0"
-llm = HuggingFacePipeline.from_model_id(
-    model_id=model_id,
-    task="text2text-generation",
-    model_kwargs={"temperature": 0, "max_length": 1000},
-)
+REQUESTED = os.environ.get("REQUESTED")
+if not REQUESTED:
+    raise ValueError("REQUESTED environment variable is not set or is empty.")
 
-template = """
-You are a friendly chatbot assistant that responds conversationally to users' questions.
-Keep the answers short, unless specifically asked by the user to elaborate on something.
+json_data = None
 
-Question: {question}
+with zipfile.ZipFile("/tmp/iexec_in/protectedData.zip") as myzip:
+    for filename in myzip.namelist():
+        if filename.endswith('.json'):
+            with myzip.open(filename) as file:
+                json_data = file.read().decode("utf-8")
 
-Answer:"""
+parsed_data = json.loads(json_data.replace("'", "\""))
+keys = list(parsed_data['data'][0].keys())
+data = {}
 
-prompt = PromptTemplate(template=template, input_variables=["question"])
+for key in keys:
+    values = [entry[key] for entry in parsed_data['data']]
+    data[key] = values
 
-llm_chain = LLMChain(prompt=prompt, llm=llm)
+table = pd.DataFrame.from_dict(data)
+print(table)
+
+tqa = pipeline(task="table-question-answering",
+               model="google/tapas-large-finetuned-wtq")
 
 
 def ask_question(question):
-    result = llm_chain(question)
-    print(result['question'])
-    print("")
-    print(result['text'])
+    result = tqa(table=table, query=question)
+    result_json = json.dumps(result)
+
+    with zipfile.ZipFile("/tmp/iexec_out/result.zip", "w") as myzip:
+        myzip.writestr("result.json", result_json)
+
+    print("Result saved to /tmp/iexec_out/result.zip")
 
 
 with Timer():
-    ask_question("Describe some famous landmarks in London")
+    ask_question(REQUESTED)
