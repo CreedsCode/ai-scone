@@ -18,6 +18,7 @@
     "npm": ">=6.0.0 <7.0.0"
   },
   "dependencies": {
+    "@huggingface/inference": "^2.6.4",
     "figlet": "^1.7.0",
     "jszip": "^3.10.1"
   },

@@ -1,7 +1,9 @@
 import * as fs from "fs/promises";
 import figlet from "figlet";
 import { extractNameFromZipFile } from "./utils";
+import { HfInference } from '@huggingface/inference'
 
+const hf = new HfInference("");
 const iexecOut: string | undefined = process.env.IEXEC_OUT || "/tmp/iexec_out";
 const iexecIn: string | undefined = process.env.IEXEC_IN || "/tmp/iexec_in";
 const dataFileName: string | undefined =
@@ -9,6 +11,19 @@ const dataFileName: string | undefined =
 
 (async () => {
     try {
+        const result = await hf.tableQuestionAnswering({
+            model: 'google/tapas-large-finetuned-wtq',
+            inputs: {
+                query: 'Top repo by stars and by contributors',
+                table: {
+                    Repository: ['Transformers', 'Datasets', 'Tokenizers'],
+                    Stars: ['36542', '4512', '3934'],
+                    Contributors: ['651', '77', '34'],
+                    'Programming language': ['Python', 'Python', 'Rust, Python and NodeJS']
+                }
+            }
+        });
+        console.log(result);
         const name = await extractNameFromZipFile(`${iexecIn}/${dataFileName}`);
 
         // Write hello to fs
