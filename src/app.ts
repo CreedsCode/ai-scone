@@ -8,9 +8,7 @@ const iexecOut: string | undefined = process.env.IEXEC_OUT || "/tmp/iexec_out";
 const iexecIn: string | undefined = process.env.IEXEC_IN || "/tmp/iexec_in";
 const dataFileName: string | undefined =
     process.env.IEXEC_DATASET_FILENAME || "protectedData.zip";
-const hfKey: string | undefined = process.env.HFKEY || "";
 
-const hf = new HfInference(hfKey);
 
 function runPythonScript(scriptPath: string) {
     PythonShell.run(scriptPath)
